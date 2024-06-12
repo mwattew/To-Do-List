@@ -109,4 +109,5 @@ class ToDoApp:
     def update_listbox(self):
         self.listbox.delete(0, tk.END)
         for i, task in enumerate(self.tasks, start=1):
-            self.listbox.insert(tk.END, f"{i}. {task}")
+            status_icon = "✅" if task.completed else "❌"
+            self.listbox.insert(tk.END, f"{i}. {status_icon} {task}")
