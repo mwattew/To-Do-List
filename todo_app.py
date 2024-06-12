@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
+from tkcalendar import Calendar
 from task import Task
 from storage import save_tasks, load_tasks
+from datetime import datetime
 
 class ToDoApp:
     def __init__(self, root):
@@ -40,10 +42,34 @@ class ToDoApp:
         description = simpledialog.askstring("Input", "Enter a task:")
         if description:
             priority = simpledialog.askstring("Input", "Enter priority (Low, Medium, High):", initialvalue="Medium")
-            due_date = simpledialog.askstring("Input", "Enter due date (YYYY-MM-DD):")
-            task = Task(description, priority, due_date)
+            due_date = self.ask_due_date()
+            due_time = simpledialog.askstring("Input", "Enter due time (HH:MM):")
+            if due_date and due_time:
+                try:
+                    due_date = datetime.strptime(due_date + " " + due_time, "%Y-%m-%d %H:%M")
+                except ValueError:
+                    messagebox.showerror("Error", "Invalid date/time format. Please use the format YYYY-MM-DD and HH:MM.")
+                    return
+            added_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+            task = Task(description, priority, due_date, added_date)
             self.tasks.append(task)
             self.update_listbox()
+
+    def ask_due_date(self):
+        top = tk.Toplevel(self.root)
+        top.grab_set()
+        cal = Calendar(top, selectmode='day')
+        cal.pack(pady=20)
+        date_str = tk.StringVar()
+
+        def on_date_select():
+            date_str.set(cal.get_date())
+            top.destroy()
+
+        select_button = tk.Button(top, text="Select Date", command=on_date_select)
+        select_button.pack(pady=20)
+        self.root.wait_window(top)
+        return date_str.get()
 
     def remove_task(self):
         selected_task_index = self.listbox.curselection()
